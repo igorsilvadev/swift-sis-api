@@ -23,9 +23,9 @@ func routes(_ app: Application) throws {
     app.get("hello"){ _ in
         return "Working"
     }
-
+    
     let sis = app.grouped("sis","api","v1")
-
+    
     sis.get("search","image",":q"){ req -> [resultImage] in
         
         var query = req.parameters.get("q")!
@@ -62,12 +62,33 @@ func routes(_ app: Application) throws {
     
     sis.get("search","msg",":q"){ req -> String in
         
-        let msg = req.parameters.get("q")!
+        var msg = req.parameters.get("q")!
+        
+        let baseURL = "https://www.bing.com/images/search?q=fusca"
+        if let url = URL(string: baseURL) {
+            do {
+                let html = try String(contentsOf: url, encoding: .ascii)
+                let doc: Document = try SwiftSoup.parse(html)
+                
+                for element in try doc.getElementsByTag("a"){
+                    if let img = try? element.attr("m"){
+                        print(img)
+                        let data = img.data(using: .utf8)
+                        if let image = try? JSONDecoder().decode(resultImage.self, from: data!){
+                            msg.append("Passou")
+                        }
+                    }
+                }
+                
+            } catch let error {
+                return "Erro de busca imagem \(msg) \(error.localizedDescription)"
+            }
+        }else{
+            msg.append("erro url")
+        }
         return "Olá \(msg)"
     }
-    
 }
-
 
 func containsEspecial(string: String) -> Bool{
     //https://stackoverflow.com/questions/27703039/check-if-string-contains-special-characters-in-swift
