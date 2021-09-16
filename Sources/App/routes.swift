@@ -51,11 +51,11 @@ func routes(_ app: Application) throws {
                 }
                 
             } catch let error {
-                print("Error: \(error)")
+                return [resultImage(murl: error.localizedDescription)]
             }
             
         }else{
-            print("URL não construida")
+            return [resultImage(murl: "Query Convert error")]
         }
         return result
     }
