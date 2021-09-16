@@ -18,6 +18,11 @@ struct resultImage: Codable, Content{
 }
 
 func routes(_ app: Application) throws {
+    
+    
+    app.get("hello"){ _ in
+        return "Working"
+    }
 
     let sis = app.grouped("sis","api","v1")
 
