@@ -75,16 +75,16 @@ func routes(_ app: Application) throws {
                         print(img)
                         let data = img.data(using: .utf8)
                         if let image = try? JSONDecoder().decode(resultImage.self, from: data!){
-                            msg.append("Passou")
+                            print("LOG>>>>> REQUEST FEITO CORRETAMENTE")
                         }
                     }
                 }
                 
             } catch let error {
-                return "Erro de busca imagem \(msg) \(error.localizedDescription)"
+                print("LOG>>>>>> ERRO DE CONVERSÃO DE DADOS HTML")
             }
         }else{
-            msg.append("erro url")
+            print("LOG>>>>>> ERRO DE URL")
         }
         return "Olá \(msg)"
     }
