@@ -1,71 +1,70 @@
 /*
-RESOURCES:
+ RESOURCES:
  
  https://stackoverflow.com/questions/60051224/how-to-get-imageurl-out-of-html-tag
  https://stackoverflow.com/questions/42462202/deleting-specific-substrings-in-strings-swift
  https://medium.com/geekculture/scraping-google-image-search-result-dfe01bcbc610
-*/
+ https://stackoverflow.com/questions/61170959/python-image-scraper-not-working-properly-on-bing
+ https://stackoverflow.com/questions/47281375/convert-json-string-to-json-object-in-swift-4/47281832
+ 
+ */
 import Vapor
 import SwiftSoup
 
+
+//Custum key: https://www.swiftbysundell.com/articles/customizing-codable-types-in-swift/
+struct resultImage: Codable, Content{
+    var murl:String
+}
+
 func routes(_ app: Application) throws {
-    app.get { req in
-        return "It works!"
-    }
-    
-    app.get("hello") { req -> String in
-        return "Hello, world!"
-    }
-    
-    app.get("search",":q"){ req -> [String] in
-        let query = req.parameters.get("q")!
+
+    let sis = app.grouped("sis","api","v1")
+
+    sis.get("search","image",":q"){ req -> [resultImage] in
         
-        var imgSrc:[String] = []
-        var result:[String] = []
-        let baseURL = "https://www.google.com/search?q=\(query)&rlz=1C5CHFA_enGB937GB937&sxsrf=ALeKk02twWeFWJCESdRh27hZxC0iZwBS6w:1617724623722&source=lnms&tbm=isch&sa=X&ved=2ahUKEwiu0ans_envAhUkT98KHZ7CDiMQ_AUoAXoECAEQAw&biw=714&bih=732"
-        print("Debug 1\(query)")
+        var query = req.parameters.get("q")!
+        //https://www.codegrepper.com/code-examples/swift/urlencode+string+swift
+        query = query.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) ?? ""
+        var result:[resultImage] = []
+        let baseURL = "https://www.bing.com/images/search?q=\(query)&form=QBLH&sp=-1&pq=camar&sc=6-5&qs=n&cvid=8F95CC537DFB48ACAC383FF851874C28&first=1&tsc=ImageBasicHover"
         if let url = URL(string: baseURL) {
             do {
                 let html = try String(contentsOf: url, encoding: .ascii)
                 let doc: Document = try SwiftSoup.parse(html)
-                for element in try doc.getElementsByTag("a").array(){
-                    if var img = try? element.attr("href"){
-                        if img.starts(with: "/url?q="){
-                            img = img.replacingOccurrences(of: "/url?q=", with: "")
-                            print(img)
-                            imgSrc.append(img)
-                            print(element)
-                        }
-                    }
-                }
-                for source in imgSrc{
-                    if let url = URL(string: source){
-                        do{
-                            let html = try String(contentsOf: url, encoding: .ascii)
-                            let doc = try SwiftSoup.parse(html)
-                            
-                            for element in try doc.getElementsByTag("img").array(){
-                                if let img = try? element.attr("src"){
-                                    if img.contains(query) && (img.hasSuffix(".jpg") || img.hasSuffix(".png") || img.hasSuffix(".jpeg")) {
-                                        print(img)
-                                        result.append(img)
-                                    }
-                                }
+                
+                for element in try doc.getElementsByTag("a"){
+                    if let img = try? element.attr("m"){
+                        print(img)
+                        let data = img.data(using: .utf8)
+                        if let image = try? JSONDecoder().decode(resultImage.self, from: data!){
+                            if !containsEspecial(string: image.murl){
+                                result.append(image)
                             }
-                        }catch let erro{
-                            return ["\(erro.localizedDescription)"]
                         }
                     }
                 }
-      
+                
             } catch let error {
                 print("Error: \(error)")
             }
             
+        }else{
+            print("URL não construida")
         }
         return result
     }
     
     
     
+}
+
+
+func containsEspecial(string: String) -> Bool{
+    //https://stackoverflow.com/questions/27703039/check-if-string-contains-special-characters-in-swift
+    let regex = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.:/-_~")
+    if string.rangeOfCharacter(from: regex.inverted) != nil {
+        return true
+    }
+    return false
 }
