@@ -10,6 +10,7 @@
  */
 import Vapor
 import SwiftSoup
+import Foundation
 
 
 //Custum key: https://www.swiftbysundell.com/articles/customizing-codable-types-in-swift/
