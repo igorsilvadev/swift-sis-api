@@ -11,24 +11,21 @@
 import Vapor
 import SwiftSoup
 
+
+//Custum key: https://www.swiftbysundell.com/articles/customizing-codable-types-in-swift/
 struct resultImage: Codable, Content{
     var murl:String
 }
 
 func routes(_ app: Application) throws {
-    app.get { req in
-        return "It works!"
-    }
-    
-    app.get("hello") { req -> String in
-        return "Hello, world!"
-    }
-    
-    app.get("search",":q"){ req -> [resultImage] in
+
+    let sis = app.grouped("sis","api","v1")
+
+    sis.get("search","image",":q"){ req -> [resultImage] in
         
         var query = req.parameters.get("q")!
-        query = query.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!
-        print("Query = \(query)")
+        //https://www.codegrepper.com/code-examples/swift/urlencode+string+swift
+        query = query.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) ?? ""
         var result:[resultImage] = []
         let baseURL = "https://www.bing.com/images/search?q=\(query)&form=QBLH&sp=-1&pq=camar&sc=6-5&qs=n&cvid=8F95CC537DFB48ACAC383FF851874C28&first=1&tsc=ImageBasicHover"
         if let url = URL(string: baseURL) {
