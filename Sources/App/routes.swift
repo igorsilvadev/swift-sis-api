@@ -32,7 +32,7 @@ func routes(_ app: Application) throws {
         //https://www.codegrepper.com/code-examples/swift/urlencode+string+swift
         query = query.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) ?? ""
         var result:[resultImage] = []
-        let baseURL = "https://www.bing.com/images/search?q=\(query)"
+        let baseURL = "http://www.bing.com/images/search?q=\(query)"
         if let url = URL(string: baseURL) {
             do {
                 let html = try String(contentsOf: url, encoding: .ascii)
@@ -64,7 +64,7 @@ func routes(_ app: Application) throws {
         
         var msg = req.parameters.get("q")!
         
-        let baseURL = "https://www.bing.com/images/search?q=fusca"
+        let baseURL = "http://www.bing.com/images/search?q=fusca"
         if let url = URL(string: baseURL) {
             do {
                 let html = try String(contentsOf: url, encoding: .ascii)
