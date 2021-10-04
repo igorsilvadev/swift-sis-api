@@ -7,5 +7,8 @@ Ela utiliza:
 
 Os resultados são extraídos de um request do Bing Image Search.
 Esta é uma versão inicial e posteriormente haverão melhorias de arquitetura, perfomance e novos filtros. 
+
+Para utilizar essa API de imagens é só fazer o request para https://sis-api.herokuapp.com/sis/api/v1/search/image/.
+Depois do /image/{nome da imagem que deseja buscar}
  
 
