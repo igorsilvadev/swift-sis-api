@@ -1,14 +1,14 @@
 
-# SIS-API (Search In Swift) é um API desenvolvida totalmente em Swift que utiliza a técnica de Web Scrapping para buscar imagens e retornar um JSON com as URLs dos resultados. 
-Ela utiliza: 
+# SIS-API (Search In Swift) is an API developed entirely in Swift that uses the Web Scrapping technique to search images and return a JSON with the URLs of the results. 
+It uses: 
 
-- [SwiftSoup](https://github.com/scinfu/SwiftSoup) (Pure Swift HTML Parser, with best of DOM, CSS, and jquery (Supports Linux, iOS, Mac, tvOS, watchOS) para trazer esses resultados. 
-- [Vapor 4](https://github.com/vapor/) ( Backend)
+- [SwiftSoup](https://github.com/scinfu/SwiftSoup) (Pure Swift HTML Parser, with best of DOM, CSS, and jquery (Supports Linux, iOS, Mac, tvOS, watchOS) to bring these results. 
+- Steam 4](https://github.com/vapor/) ( Backend)
 
-Os resultados são extraídos de um request do Bing Image Search.
-Esta é uma versão inicial e posteriormente haverão melhorias de arquitetura, perfomance e novos filtros. 
+The results are extracted from a Bing Image Search request.
+This is an initial version and later there will be improvements in architecture, performance and new filters. 
 
-Para utilizar essa API de imagens é só fazer o request para https://sis-api.herokuapp.com/sis/api/v1/search/image/.
-Depois do /image/{nome da imagem que deseja buscar}
+To use this image API, just make a request to https://sis-api.herokuapp.com/sis/api/v1/search/image/.
+After /image/{name of the image you want to search for}
  
 
