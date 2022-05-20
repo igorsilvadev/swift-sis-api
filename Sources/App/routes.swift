@@ -14,88 +14,83 @@ import Foundation
 
 
 //Custum key: https://www.swiftbysundell.com/articles/customizing-codable-types-in-swift/
-struct resultImage: Codable, Content{
-    var murl:String
+struct ImageObject: Codable {
+    var url: String
+    var website: String
+    var title: String
+    var description: String
+    
+    enum CodingKeys: String, CodingKey {
+        case url = "murl"
+        case website = "purl"
+        case title = "t"
+        case description = "desc"
+    }
+}
+
+struct ImageObjectResponse: Codable, Content {
+    var url: String
+    var website: String
+    var title: String
+    var description: String
 }
 
 func routes(_ app: Application) throws {
     
+    let sis = app.grouped("sis","api","v2")
     
-    app.get("hello"){ _ in
-        return "Working"
-    }
-    
-    let sis = app.grouped("sis","api","v1")
-    
-    sis.get("search","image",":q"){ req -> [resultImage] in
+    sis.get("search","image",":q"){ req throws -> [ImageObjectResponse]  in
+        var result :[ImageObjectResponse] = []
         
-        var query = req.parameters.get("q")!
-        //https://www.codegrepper.com/code-examples/swift/urlencode+string+swift
+        guard var query = req.parameters.get("q") else { throw Abort.init(.badRequest, reason: "Invalid query") }
         query = query.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) ?? ""
-        var result:[resultImage] = []
         let baseURL = "http://www.bing.com/images/search?q=\(query)"
-        if let url = URL(string: baseURL) {
-            do {
-                let html = try String(contentsOf: url, encoding: .ascii)
-                let doc: Document = try SwiftSoup.parse(html)
-                
-                for element in try doc.getElementsByTag("a"){
-                    if let img = try? element.attr("m"){
-                        print(img)
-                        let data = img.data(using: .utf8)
-                        if let image = try? JSONDecoder().decode(resultImage.self, from: data!){
-                            if !containsEspecial(string: image.murl){
-                                result.append(image)
-                            }
-                        }
-                    }
-                }
-                
-            } catch let error {
-                return [resultImage(murl: error.localizedDescription)]
-            }
+        
+        guard let url = URL(string: baseURL) else { throw Abort(.badRequest, reason: "Error creating search URL")}
+        do {
+            let html = try String(contentsOf: url, encoding: .ascii)
+            let doc: Document = try SwiftSoup.parse(html)
             
-        }else{
-            return [resultImage(murl: "Query Convert error")]
+            for element in try doc.getElementsByTag("a"){
+                if let imgJson = try? element.attr("m"), let data = imgJson.data(using: .utf8), let object = try! decodeImageData(data: data) {
+                    result.append(ImageObjectResponse(url: object.url,
+                                                      website: object.website,
+                                                      title: object.title,
+                                                      description: object.description))
+                }
+            }
+        } catch {
+            throw Abort(.internalServerError, reason: "Error when creating image list")
         }
         return result
     }
-    
-    sis.get("search","msg",":q"){ req -> String in
-        
-        var msg = req.parameters.get("q")!
-        
-        let baseURL = "http://www.bing.com/images/search?q=fusca"
-        if let url = URL(string: baseURL) {
-            do {
-                let html = try String(contentsOf: url, encoding: .ascii)
-                let doc: Document = try SwiftSoup.parse(html)
-                
-                for element in try doc.getElementsByTag("a"){
-                    if let img = try? element.attr("m"){
-                        print(img)
-                        let data = img.data(using: .utf8)
-                        if let image = try? JSONDecoder().decode(resultImage.self, from: data!){
-                            print("LOG>>>>> REQUEST FEITO CORRETAMENTE")
-                        }
-                    }
-                }
-                
-            } catch let error {
-                print("LOG>>>>>> ERRO DE CONVERSÃO DE DADOS HTML")
-            }
-        }else{
-            print("LOG>>>>>> ERRO DE URL")
-        }
-        return "Olá \(msg)"
-    }
 }
 
-func containsEspecial(string: String) -> Bool{
-    //https://stackoverflow.com/questions/27703039/check-if-string-contains-special-characters-in-swift
-    let regex = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.:/-_~")
-    if string.rangeOfCharacter(from: regex.inverted) != nil {
-        return true
-    }
-    return false
+
+private func decodeImageData(data: Data?) throws -> ImageObject? {
+    guard let data = data, let imageObject = try? JSONDecoder().decode(ImageObject.self, from: data), !containsEspecial(url: imageObject.url) else { return nil }
+    return imageObject
 }
+
+private func containsEspecial(url: String) -> Bool {
+    let regex = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.:/-_~")
+    return url.rangeOfCharacter(from: regex.inverted) != nil ? true : false
+}
+
+
+/*
+ 
+ /// Check if the parameter contains any special characters.
+ /// - Parameter specialCharacters: The userInput that may or not contains special characters
+ /// - Returns true if the input contains one or more special characters
+ static func passwordContains(specialCharacters: String) -> Bool {
+     let initCharset = {(charsets: CharacterSet...) -> CharacterSet in
+         var sets = CharacterSet()
+         charsets.forEach { sets.formUnion($0) }
+         return sets
+     }, charset = initCharset(.symbols, .whitespaces, .nonBaseCharacters, .punctuationCharacters)
+     return specialCharacters.rangeOfCharacter(from: charset) != nil ? true : false
+ }
+ 
+ 
+ */
