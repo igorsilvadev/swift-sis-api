@@ -16,17 +16,17 @@ func routes(_ app: Application) throws {
     
     let sis = app.grouped("sis","api","v2")
     
-    sis.get("search","image",":q"){ req -> [ImageObjectResponse]  in
+    sis.get("search","image",":q"){ req -> EventLoopFuture<Response> in
         var result: [ImageObjectResponse] = []
         
         guard var query = req.parameters.get("q") else {
-            throw Abort.init(.badRequest, reason: "Invalid search text")
+            return [ImageObjectResponse]().encodeResponse(status: .badRequest, for: req)
         }
         query = query.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) ?? ""
         let baseURL = "http://www.bing.com/images/search?q=\(query)"
         
         guard let url = URL(string: baseURL) else {
-            throw Abort(.badRequest, reason: "Error creating search URL")
+            return [ImageObjectResponse]().encodeResponse(status: .badRequest, for: req)
         }
         do {
             let html = try String(contentsOf: url, encoding: .utf8)
@@ -41,9 +41,9 @@ func routes(_ app: Application) throws {
                 }
             }
         } catch {
-            throw Abort(.internalServerError, reason: "Error when creating image list")
+            return [ImageObjectResponse]().encodeResponse(status: .internalServerError, for: req)
         }
-        return result
+        return result.encodeResponse(status: .ok, for: req)
     }
 }
 
