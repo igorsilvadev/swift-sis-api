@@ -8,7 +8,7 @@ SIS API is an API developed entirely in Swift that uses the Web Scrapping techni
 
 #### Get a list of images
 
-```http
+```
   GET /sis/api/v2/search/image/${q}
 ```
 
@@ -19,7 +19,7 @@ SIS API is an API developed entirely in Swift that uses the Web Scrapping techni
 
 ## Request Example
 
-```http
+```
   GET /sis/api/v2/search/image/ronaldinho
 ```
 ## Response
@@ -84,7 +84,7 @@ vapor xcode
 ```
 Xcode will open, in which you can run the project. After the compilation go to your browser: 
 
-```http
+```
 http://127.0.0.1:8080/sis/api/v2/search/image/ronaldinho
 
 ```
