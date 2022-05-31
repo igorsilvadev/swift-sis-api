@@ -47,7 +47,7 @@ SIS API is an API developed entirely in Swift that uses the Web Scrapping techni
 
 
 
-## Installing Steam
+## Installing Vapor
 
 Documentation Reference Vapor 4: 
 https://docs.vapor.codes/install/macos/
